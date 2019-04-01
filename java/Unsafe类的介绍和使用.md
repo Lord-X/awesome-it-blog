@@ -41,7 +41,7 @@ Java是一个安全的面向对象的编程语言。这里的安全指的是什�
 
 点下面这里下载即可
 
-![OpenJDK8下载](http://pnxjswhv3.bkt.clouddn.com/image/OpenJDK8%E4%B8%8B%E8%BD%BD.jpg)
+![OpenJDK8下载](https://github.com/Lord-X/awesome-it-blog/blob/master/images/Unsafe%E7%B1%BB%E7%9A%84%E4%BD%BF%E7%94%A8%E5%92%8C%E4%BB%8B%E7%BB%8D_OpenJDK8%E4%B8%8B%E8%BD%BD.jpg?raw=true)
 
 下载后是zip包，解压到一个地方就好。
 
