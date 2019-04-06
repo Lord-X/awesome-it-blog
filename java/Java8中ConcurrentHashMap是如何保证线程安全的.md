@@ -1,7 +1,7 @@
 HashMap是工作中使用频度非常高的一个K-V存储容器。在多线程环境下，使用HashMap是不安全的，可能产生各种非期望的结果。
 
 关于HashMap线程安全问题，可参考笔者的另一篇文章：
-[深入解读HashMap线程安全性问题](link:深入解读HashMap线程安全性问题)
+[深入解读HashMap线程安全性问题](https://github.com/Lord-X/awesome-it-blog/blob/master/java/%E6%B7%B1%E5%85%A5%E8%A7%A3%E8%AF%BBHashMap%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E9%97%AE%E9%A2%98.md)
 
 针对HashMap在多线程环境下不安全这个问题，HashMap的作者认为这并不是bug，而是应该使用线程安全的HashMap。
 
@@ -221,7 +221,7 @@ static {
 
 获取的这个偏移量主要用于干啥呢？不着急，在下文的分析中，遇到的时候再研究就好。
 
-> PS：关于Unsafe的介绍和使用，可以查看笔者的另一篇文章 [Unsafe类的介绍和使用](Unsafe类的介绍和使用)
+> PS：关于Unsafe的介绍和使用，可以查看笔者的另一篇文章 [Unsafe类的介绍和使用](https://github.com/Lord-X/awesome-it-blog/blob/master/java/Unsafe%E7%B1%BB%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8.md)
 
 ### 2 内部数据结构
 先来从源码角度看一下JDK8中是怎么定义的存储结构。
@@ -254,7 +254,7 @@ static class Node<K,V> implements Map.Entry<K,V> {
 ```
 可以发现，JDK8与JDK7的实现由较大的不同，JDK8中不在使用Segment的概念，他更像HashMap的实现方式。
 
-> PS：关于HashMap的原理，可以参考笔者的另一篇文章 [HashMap原理及内部存储结构](HashMap原理及内部存储结构)
+> PS：关于HashMap的原理，可以参考笔者的另一篇文章 [HashMap原理及内部存储结构](https://github.com/Lord-X/awesome-it-blog/blob/master/java/HashMap%E5%8E%9F%E7%90%86%E5%8F%8A%E5%86%85%E9%83%A8%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.md)
 
 这个结构可以通过下图描述出来
 
@@ -340,8 +340,8 @@ private final Node<K,V>[] initTable() {
     return tab;
 }
 ```
-
-成员变量sizeCtl类似于一个标识，例如，当他等于-1的时候，说明已经有某一线程在执行hash表的初始化了，一个小于-1的值表示某一线程正在对hash表执行resize。
+成员变量sizeCtl在ConcurrentHashMap中的其中一个作用相当于HashMap中的threshold，当hash表中元素个数超过sizeCtl时，触发扩容；
+他的另一个作用类似于一个标识，例如，当他等于-1的时候，说明已经有某一线程在执行hash表的初始化了，一个小于-1的值表示某一线程正在对hash表执行resize。
 
 这个方法首先判断sizeCtl是否小于0，如果小于0，直接将当前线程变为就绪状态的线程。
 
@@ -361,10 +361,9 @@ private final Node<K,V>[] initTable() {
 在Thread3中，如果不做双重判断，Thread3也会走到new Node[]这一步。
 
 ### 4 线程安全的put
-put操作可分为以下三类
+put操作可分为以下两类
 * 当前hash表对应当前key的index上没有元素时
-* 当前hash表对应当前key的index上已经存在元素时
-* 正在进行扩容时的put
+* 当前hash表对应当前key的index上已经存在元素时(hash碰撞)
 
 #### 4.1 hash表上没有元素时
 对应源码如下
@@ -388,7 +387,307 @@ tabAt方法通过Unsafe.getObjectVolatile()的方式获取数组对应index上�
 
 如果获取的是空，尝试用cas的方式在数组的指定index上创建一个新的Node。
 
-### 5 线程安全的扩容
+#### 4.2 hash碰撞时
+对应源码如下
+```java
+else {
+    V oldVal = null;
+    // 锁f是在4.1中通过tabAt方法获取的
+    // 也就是说，当发生hash碰撞时，会以链表的头结点作为锁
+    synchronized (f) {
+        // 这个检查的原因在于：
+        // tab引用的是成员变量table，table在发生了rehash之后，原来index上的Node可能会变
+        // 这里就是为了确保在put的过程中，没有收到rehash的影响，指定index上的Node仍然是f
+        // 如果不是f，那这个锁就没有意义了
+        if (tabAt(tab, i) == f) {
+            // 确保put没有发生在扩容的过程中，fh=-1时表示正在扩容
+            if (fh >= 0) {
+                binCount = 1;
+                for (Node<K,V> e = f;; ++binCount) {
+                    K ek;
+                    if (e.hash == hash &&
+                        ((ek = e.key) == key ||
+                         (ek != null && key.equals(ek)))) {
+                        oldVal = e.val;
+                        if (!onlyIfAbsent)
+                            e.val = value;
+                        break;
+                    }
+                    Node<K,V> pred = e;
+                    if ((e = e.next) == null) {
+                        // 在链表后面追加元素
+                        pred.next = new Node<K,V>(hash, key,
+                                                  value, null);
+                        break;
+                    }
+                }
+            }
+            else if (f instanceof TreeBin) {
+                Node<K,V> p;
+                binCount = 2;
+                if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
+                                               value)) != null) {
+                    oldVal = p.val;
+                    if (!onlyIfAbsent)
+                        p.val = value;
+                }
+            }
+        }
+    }
+    if (binCount != 0) {
+        // 如果链表长度超过8个，将链表转换为红黑树，与HashMap相同，相对于JDK7来说，优化了查找效率
+        if (binCount >= TREEIFY_THRESHOLD)
+            treeifyBin(tab, i);
+        if (oldVal != null)
+            return oldVal;
+        break;
+    }
+}
+```
 
+不同于JDK7中segment的概念，JDK8中直接用链表的头节点做为锁。
+JDK7中，HashMap在多线程并发put的情况下可能会形成环形链表，ConcurrentHashMap通过这个锁的方式，使同一时间只有有一个线程对某一链表执行put，解决了并发问题。
+
+### 5 线程安全的扩容
+put方法的最后一步是统计hash表中元素的个数，如果超过sizeCtl的值，触发扩容。
+
+扩容的代码略长，可大致看一下里面的中文注释，再参考下面的分析。
+其实我们主要的目的是弄明白ConcurrentHashMap是如何解决HashMap的并发问题的。
+带着这个问题来看源码就好。关于HashMap存在的问题，参考本文一开始说的笔者的另一篇文章即可。
+
+其实HashMap的并发问题多半是由于put和扩容并发导致的。
+
+这里我们就来看一下ConcurrentHashMap是如何解决的。
+
+扩容涉及的代码如下：
+
+```java
+/**
+ * The array of bins. Lazily initialized upon first insertion.
+ * Size is always a power of two. Accessed directly by iterators.
+ * 业务中使用的hash表
+ */
+transient volatile Node<K,V>[] table;
+
+/**
+ * The next table to use; non-null only while resizing.
+ * 扩容时才使用的hash表，扩容完成后赋值给table，并将nextTable重置为null。
+ */
+private transient volatile Node<K,V>[] nextTable;
+
+/**
+ * Adds to count, and if table is too small and not already
+ * resizing, initiates transfer. If already resizing, helps
+ * perform transfer if work is available.  Rechecks occupancy
+ * after a transfer to see if another resize is already needed
+ * because resizings are lagging additions.
+ *
+ * @param x the count to add
+ * @param check if <0, don't check resize, if <= 1 only check if uncontended
+ */
+private final void addCount(long x, int check) {
+    // ----- 计算键值对的个数 start -----
+    CounterCell[] as; long b, s;
+    if ((as = counterCells) != null ||
+        !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) {
+        CounterCell a; long v; int m;
+        boolean uncontended = true;
+        if (as == null || (m = as.length - 1) < 0 ||
+            (a = as[ThreadLocalRandom.getProbe() & m]) == null ||
+            !(uncontended =
+              U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) {
+            fullAddCount(x, uncontended);
+            return;
+        }
+        if (check <= 1)
+            return;
+        s = sumCount();
+    }
+    // ----- 计算键值对的个数 end -----
+    // ----- 判断是否需要扩容 start -----
+    if (check >= 0) {
+        Node<K,V>[] tab, nt; int n, sc;
+        // 当上面计算出来的键值对个数超出sizeCtl时，触发扩容，调用核心方法transfer
+        while (s >= (long)(sc = sizeCtl) && (tab = table) != null &&
+               (n = tab.length) < MAXIMUM_CAPACITY) {
+            int rs = resizeStamp(n);
+            if (sc < 0) {
+                if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
+                    sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||
+                    transferIndex <= 0)
+                    break;
+                // 如果有已经在执行的扩容操作，nextTable是正在扩容中的新的hash表
+                // 如果并发扩容，transfer直接使用正在扩容的新hash表，保证了不会出现hash表覆盖的情况
+                if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))
+                    transfer(tab, nt);
+            }
+            // 更新sizeCtl的值，更新成功后为负数，扩容开始
+            // 此时没有并发扩容的情况，transfer中会new一个新的hash表来扩容
+            else if (U.compareAndSwapInt(this, SIZECTL, sc,
+                                         (rs << RESIZE_STAMP_SHIFT) + 2))
+                transfer(tab, null);
+            s = sumCount();
+        }
+    }
+    // ----- 判断是否需要扩容 end -----
+}
+
+/**
+ * Moves and/or copies the nodes in each bin to new table. See
+ * above for explanation.
+ */
+private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
+    int n = tab.length, stride;
+    if ((stride = (NCPU > 1) ? (n >>> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
+        stride = MIN_TRANSFER_STRIDE; // subdivide range
+    if (nextTab == null) {            // initiating
+        try {
+            @SuppressWarnings("unchecked")
+            // 初始化新的hash表，大小为之前的2倍，并赋值给成员变量nextTable
+            Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n << 1];
+            nextTab = nt;
+        } catch (Throwable ex) {      // try to cope with OOME
+            sizeCtl = Integer.MAX_VALUE;
+            return;
+        }
+        nextTable = nextTab;
+        transferIndex = n;
+    }
+    int nextn = nextTab.length;
+    ForwardingNode<K,V> fwd = new ForwardingNode<K,V>(nextTab);
+    boolean advance = true;
+    boolean finishing = false; // to ensure sweep before committing nextTab
+    for (int i = 0, bound = 0;;) {
+        Node<K,V> f; int fh;
+        while (advance) {
+            int nextIndex, nextBound;
+            if (--i >= bound || finishing)
+                advance = false;
+            else if ((nextIndex = transferIndex) <= 0) {
+                i = -1;
+                advance = false;
+            }
+            else if (U.compareAndSwapInt
+                     (this, TRANSFERINDEX, nextIndex,
+                      nextBound = (nextIndex > stride ?
+                                   nextIndex - stride : 0))) {
+                bound = nextBound;
+                i = nextIndex - 1;
+                advance = false;
+            }
+        }
+        if (i < 0 || i >= n || i + n >= nextn) {
+            int sc;
+            // 扩容完成时，将成员变量nextTable置为null，并将table替换为rehash后的nextTable
+            if (finishing) {
+                nextTable = null;
+                table = nextTab;
+                sizeCtl = (n << 1) - (n >>> 1);
+                return;
+            }
+            if (U.compareAndSwapInt(this, SIZECTL, sc = sizeCtl, sc - 1)) {
+                if ((sc - 2) != resizeStamp(n) << RESIZE_STAMP_SHIFT)
+                    return;
+                finishing = advance = true;
+                i = n; // recheck before commit
+            }
+        }
+        else if ((f = tabAt(tab, i)) == null)
+            advance = casTabAt(tab, i, null, fwd);
+        else if ((fh = f.hash) == MOVED)
+            advance = true; // already processed
+        else {
+            // 接下来是遍历每个链表，对每个链表的元素进行rehash
+            // 仍然用头结点作为锁，所以在扩容的时候，无法对这个链表执行put操作
+            synchronized (f) {
+                if (tabAt(tab, i) == f) {
+                    Node<K,V> ln, hn;
+                    if (fh >= 0) {
+                        int runBit = fh & n;
+                        Node<K,V> lastRun = f;
+                        for (Node<K,V> p = f.next; p != null; p = p.next) {
+                            int b = p.hash & n;
+                            if (b != runBit) {
+                                runBit = b;
+                                lastRun = p;
+                            }
+                        }
+                        if (runBit == 0) {
+                            ln = lastRun;
+                            hn = null;
+                        }
+                        else {
+                            hn = lastRun;
+                            ln = null;
+                        }
+                        for (Node<K,V> p = f; p != lastRun; p = p.next) {
+                            int ph = p.hash; K pk = p.key; V pv = p.val;
+                            if ((ph & n) == 0)
+                                ln = new Node<K,V>(ph, pk, pv, ln);
+                            else
+                                hn = new Node<K,V>(ph, pk, pv, hn);
+                        }
+                        // setTabAt方法调用了Unsafe.putObjectVolatile来完成hash表元素的替换，具备volatile内存语义
+                        setTabAt(nextTab, i, ln);
+                        setTabAt(nextTab, i + n, hn);
+                        setTabAt(tab, i, fwd);
+                        advance = true;
+                    }
+                    else if (f instanceof TreeBin) {
+                        TreeBin<K,V> t = (TreeBin<K,V>)f;
+                        TreeNode<K,V> lo = null, loTail = null;
+                        TreeNode<K,V> hi = null, hiTail = null;
+                        int lc = 0, hc = 0;
+                        for (Node<K,V> e = t.first; e != null; e = e.next) {
+                            int h = e.hash;
+                            TreeNode<K,V> p = new TreeNode<K,V>
+                                (h, e.key, e.val, null, null);
+                            if ((h & n) == 0) {
+                                if ((p.prev = loTail) == null)
+                                    lo = p;
+                                else
+                                    loTail.next = p;
+                                loTail = p;
+                                ++lc;
+                            }
+                            else {
+                                if ((p.prev = hiTail) == null)
+                                    hi = p;
+                                else
+                                    hiTail.next = p;
+                                hiTail = p;
+                                ++hc;
+                            }
+                        }
+                        ln = (lc <= UNTREEIFY_THRESHOLD) ? untreeify(lo) :
+                            (hc != 0) ? new TreeBin<K,V>(lo) : t;
+                        hn = (hc <= UNTREEIFY_THRESHOLD) ? untreeify(hi) :
+                            (lc != 0) ? new TreeBin<K,V>(hi) : t;
+                        setTabAt(nextTab, i, ln);
+                        setTabAt(nextTab, i + n, hn);
+                        setTabAt(tab, i, fwd);
+                        advance = true;
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+根据上述代码，对ConcurrentHashMap是如何解决HashMap并发问题这一疑问进行简要说明。
+
+* 首先new一个新的hash表(nextTable)出来，大小是原来的2倍。后面的rehash都是针对这个新的hash表操作，不涉及原hash表(table)。
+* 然后会对原hash表(table)中的每个链表进行rehash，此时会尝试获取头节点的锁。这一步就保证了在rehash的过程中不能对这个链表执行put操作。
+* 通过sizeCtl控制，使扩容过程中不会new出多个新hash表来。
+* 最后，将所有键值对重新rehash到新表(nextTable)中后，用nextTable将table替换。这就避免了HashMap中get和扩容并发时，可能get到null的问题。
+* 在整个过程中，共享变量的存储和读取全部通过volatile或CAS的方式，保证了线程安全。
 
 ### 6 总结
+
+多线程环境下，对共享变量的操作一定要小心。要充分从Java内存模型的角度考虑问题。
+
+ConcurrentHashMap中大量的用到了Unsafe类的方法，我们自己虽然也能拿到Unsafe的实例，但在生产中不建议这么做。
+多数情况下，我们可以通过并发包中提供的工具来实现，例如Atomic包下面的可以用来实现CAS操作，lock包下可以用来实现锁相关的操作。
+
+善用线程安全的容器工具，例如ConcurrentHashMap、CopyOnWriteArrayList、ConcurrentLinkedQueue等，因为我们在工作中无法像ConcurrentHashMap这样通过Unsafe的getObjectVolatile和setObjectVolatile原子性的更新数组中的元素，所以这些并发工具是很重要的。
