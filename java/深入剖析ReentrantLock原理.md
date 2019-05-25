@@ -293,9 +293,159 @@ static final class FairSync extends Sync {
 ![公平锁的竞争](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/3_%E5%85%AC%E5%B9%B3%E9%94%81%E7%9A%84%E7%AB%9E%E4%BA%89.png)
 
 
+### 4 tryLock原理
+
+tryLock做的事情很简单：让当前线程尝试获取一次锁，成功的话返回true，否则false。
+
+其实现，其实就是调用了nonfairTryAcquire方法来获取锁。
+
+```java
+public boolean tryLock() {
+    return sync.nonfairTryAcquire(1);
+}
+```
+
+至于获取失败的话，他也不会将自己添加到同步队列中等待，直接返回false，让业务调用代码自己处理。
 
 
+### 5 可中断的获取锁
 
+中断，也就是通过Thread的interrupt方法将某个线程中断，中断一个阻塞状态的线程，会抛出一个InterruptedException异常。
 
+如果获取锁是可中断的，当一个线程长时间获取不到锁时，我们可以主动将其中断，可避免死锁的产生。
 
+其实现方式如下：
 
+```java
+public void lockInterruptibly() throws InterruptedException {
+    sync.acquireInterruptibly(1);
+}
+```
+
+会调用AQS的acquireInterruptibly方法
+
+```java
+public final void acquireInterruptibly(int arg)
+        throws InterruptedException {
+    // 判断当前线程是否已经中断，如果已中断，抛出InterruptedException异常
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    if (!tryAcquire(arg))
+        doAcquireInterruptibly(arg);
+}
+```
+
+此时会优先通过tryAcquire尝试获取锁，如果获取失败，会将自己加入到队列中等待，并可随时响应中断。
+
+```java
+private void doAcquireInterruptibly(int arg)
+    throws InterruptedException {
+    // 将自己添加到队列中等待
+    final Node node = addWaiter(Node.EXCLUSIVE);
+    boolean failed = true;
+    try {
+        // 自旋的获取锁
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return;
+            }
+            // 获取锁失败，在parkAndCheckInterrupt方法中，通过LockSupport.park()阻塞当前线程，
+            // 并调用Thread.interrupted()判断当前线程是否已经被中断
+            // 如果被中断，直接抛出InterruptedException异常，退出锁的竞争队列
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                // #1
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+PS：不可中断的方式下，代码#1位置不会抛出InterruptedException异常，只是简单的记录一下当前线程被中断了。
+
+### 6 可超时的获取锁
+
+通过如下方法实现，timeout是超时时间，unit代表时间的单位（毫秒、秒...）
+
+```java
+public boolean tryLock(long timeout, TimeUnit unit)
+        throws InterruptedException {
+    return sync.tryAcquireNanos(1, unit.toNanos(timeout));
+}
+```
+
+可以发现，这也是一个可以响应中断的方法。然后调用AQS的tryAcquireNanos方法：
+
+```java
+public final boolean tryAcquireNanos(int arg, long nanosTimeout)
+        throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    return tryAcquire(arg) ||
+        doAcquireNanos(arg, nanosTimeout);
+}
+```
+
+doAcquireNanos方法与中断里面的方法大同小异，下面在注释中说明一下不同的地方：
+
+```java
+private boolean doAcquireNanos(int arg, long nanosTimeout)
+        throws InterruptedException {
+    if (nanosTimeout <= 0L)
+        return false;
+    // 计算超时截止时间
+    final long deadline = System.nanoTime() + nanosTimeout;
+    final Node node = addWaiter(Node.EXCLUSIVE);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return true;
+            }
+            // 计算到截止时间的剩余时间
+            nanosTimeout = deadline - System.nanoTime();
+            if (nanosTimeout <= 0L) // 超时了，获取失败
+                return false;
+            // 超时时间大于1000纳秒时，才阻塞
+            // 因为如果小于1000纳秒，基本可以认为超时了（系统调用的时间可能都比这个长）
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                nanosTimeout > spinForTimeoutThreshold)
+                LockSupport.parkNanos(this, nanosTimeout);
+            // 响应中断
+            if (Thread.interrupted())
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+### 7 总结
+本文首先对比了元老级的锁synchronized与ReentrantLock的不同，ReentrantLock具有一下优势：
+* 同时支持公平锁与非公平锁
+* 支持：尝试非阻塞的一次性获取锁
+* 支持超时获取锁
+* 支持可中断的获取锁
+* 支持更多的等待条件（Condition）
+
+然后介绍了几个主要特性的实现原理，这些都是基于AQS的。
+
+ReentrantLock的核心，是通过修改AQS中state的值来同步锁的状态。
+通过这个方式，实现了可重入。
+
+ReentrantLock具备公平锁和非公平锁，默认使用非公平锁。其实现原理主要依赖于AQS中的同步队列。
+
+最后，可中断的机制是内部通过Thread.interrupted()判断当前线程是否已被中断，如果被中断就抛出InterruptedException异常来实现的。
