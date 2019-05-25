@@ -244,6 +244,7 @@ public final boolean release(int arg) {
 
 ```java
 protected final boolean tryRelease(int releases) {
+    // 将state的值-1，如果-1之后等于0，释放锁成功
     int c = getState() - releases;
     if (Thread.currentThread() != getExclusiveOwnerThread())
         throw new IllegalMonitorStateException();
