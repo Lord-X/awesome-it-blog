@@ -151,35 +151,10 @@ public ReentrantLock(boolean fair) {
 }
 ```
 
-sync是ReentrantLock的成员变量，是其内部类Sync的实例。NonfairSync和FairSync都是Sync类的子类。他们在源码中的定义如下：
+sync是ReentrantLock的成员变量，是其内部类Sync的实例。NonfairSync和FairSync都是Sync类的子类。可以参考如下类关系图：
 
-```java
-/** Synchronizer providing all implementation mechanics */
-private final Sync sync;
+![ReentrantLock类关系图](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/1_ReentrantLock%E7%B1%BB%E5%9B%BE.png)
 
-/**
- * Base of synchronization control for this lock. Subclassed
- * into fair and nonfair versions below. Uses AQS state to
- * represent the number of holds on the lock.
- */
-abstract static class Sync extends AbstractQueuedSynchronizer {
-	// ......
-}
-
-/**
- * Sync object for non-fair locks
- */
-static final class NonfairSync extends Sync {
-	// ......
-}
-
-/**
- * Sync object for fair locks
- */
-static final class FairSync extends Sync {
-	// ......
-}
-```
 Sync继承了AQS，所以他具备了AQS的功能。同样的，NonfairSync和FairSync都是AQS的子类。
 
 当我们通过无参构造函数获取ReentrantLock实例后，默认用的就是非公平锁。
@@ -235,6 +210,8 @@ public final boolean release(int arg) {
     if (tryRelease(arg)) {
         Node h = head;
         if (h != null && h.waitStatus != 0)
+            // 成功释放锁后，唤醒同步队列中的下一个节点，使之可以重新竞争锁
+            // 注意此时不会唤醒队列第一个节点之后的节点，这些节点此时还是无法竞争锁
             unparkSuccessor(h);
         return true;
     }
@@ -258,8 +235,63 @@ protected final boolean tryRelease(int releases) {
 }
 ```
 
+这时锁被释放了，被唤醒的线程和新来的线程重新竞争锁（不包含同步队列后面的那些线程）。
+
+回到lock方法中，由于此时所有线程都能通过CAS来获取锁，并不能保证被唤醒的那个线程能竞争过新来的线程，所以是非公平的。这就是非公平锁的实现。
+
+这个过程大概可以描述为下图这样子：
+
+![非公平锁的竞争](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/2_%E9%9D%9E%E5%85%AC%E5%B9%B3%E9%94%81%E7%9A%84%E7%AB%9E%E4%BA%89.png)
 
 ### 3 公平锁的实现原理
+
+公平锁与非公平锁的释放锁的逻辑是一样的，都是调用上述的unlock方法，最大区别在于获取锁的时候。
+
+```java
+static final class FairSync extends Sync {
+    private static final long serialVersionUID = -3000897897090466540L;
+    // 获取锁，与非公平锁的不同的地方在于，这里直接调用的AQS的acquire方法，没有先尝试获取锁
+    // acquire又调用了下面的tryAcquire方法，核心在于这个方法
+    final void lock() {
+        acquire(1);
+    }
+
+    /**
+     * 这个方法和nonfairTryAcquire方法只有一点不同，在标注为#1的地方
+     * 多了一个判断hasQueuedPredecessors，这个方法是判断当前AQS的同步队列中是否还有等待的线程
+     * 如果有，返回true，否则返回false。
+     * 由此可知，当队列中没有等待的线程时，当前线程才能尝试通过CAS的方式获取锁。
+     * 否则就让这个线程去队列后面排队。
+     */
+    protected final boolean tryAcquire(int acquires) {
+        final Thread current = Thread.currentThread();
+        int c = getState();
+        if (c == 0) {
+            // #1
+            if (!hasQueuedPredecessors() &&
+                compareAndSetState(0, acquires)) {
+                setExclusiveOwnerThread(current);
+                return true;
+            }
+        }
+        else if (current == getExclusiveOwnerThread()) {
+            int nextc = c + acquires;
+            if (nextc < 0)
+                throw new Error("Maximum lock count exceeded");
+            setState(nextc);
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+通过注释可知，在公平锁的机制下，任何线程想要获取锁，都要排队，不可能出现插队的情况。这就是公平锁的实现原理。
+
+这个过程大概可以描述为下图这样子：
+
+![公平锁的竞争](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/3_%E5%85%AC%E5%B9%B3%E9%94%81%E7%9A%84%E7%AB%9E%E4%BA%89.png)
+
 
 
 
