@@ -96,19 +96,19 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 假设当前HashMap中的table状态如下：
 
-![hashmap9](http://pnxjswhv3.bkt.clouddn.com/image/hashmap9.png)
+![hashmap9](http://feathers.zrbcool.top/image/hashmap9.png)
 
 此时t1和t2同时执行put，假设t1执行put(“key2”, “value2”)，t2执行put(“key3”, “value3”)，并且key2和key3的hash值与图中的key1相同。
 
 那么正常情况下，put完成后，table的状态应该是下图二者其一
 
-![hashmap10](http://pnxjswhv3.bkt.clouddn.com/image/hashmap10.png)
+![hashmap10](http://feathers.zrbcool.top/image/hashmap10.png)
 
 下面来看看异常情况
 
 假设线程1、线程2现在都执行到put源代码中#1的位置，且当前table状态如下
 
-![hashmap11](http://pnxjswhv3.bkt.clouddn.com/image/hashmap11.png)
+![hashmap11](http://feathers.zrbcool.top/image/hashmap11.png)
 
 
 然后两个线程都执行了if ((e = p.next) == null)这句代码，来到了#2这行代码。
@@ -117,13 +117,13 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 那么table会变成如下状态
 
-![hashmap12](http://pnxjswhv3.bkt.clouddn.com/image/hashmap12.png)
+![hashmap12](http://feathers.zrbcool.top/image/hashmap12.png)
 
 紧接着t2执行p.next = newNode(hash, key, value, null);
 
 此时table会变成如下状态
 
-![hashmap13](http://pnxjswhv3.bkt.clouddn.com/image/hashmap13.png)
+![hashmap13](http://feathers.zrbcool.top/image/hashmap13.png)
 
 这样一来，key2元素就丢了。
 
@@ -286,7 +286,7 @@ void transfer(Entry[] newTable, boolean rehash) {
 
 假设线程1(t1)和线程2(t2)同时resize，两个线程resize前，两个线程及hashmap的状态如下
 
-![hashmap14](http://pnxjswhv3.bkt.clouddn.com/image/hashmap14.png)
+![hashmap14](http://feathers.zrbcool.top/image/hashmap14.png)
 
 堆内存中的HashMap对象中的table字段指向旧的hash表，其中index为7的位置有两个元素，我们以这两个元素的rehash为例，看看循环链表是如何形成的。
 
@@ -298,21 +298,21 @@ void transfer(Entry[] newTable, boolean rehash) {
 
 这里可以根据上图推算一下，此时状态如下
 
-![hashmap15](http://pnxjswhv3.bkt.clouddn.com/image/hashmap15.png)
+![hashmap15](http://feathers.zrbcool.top/image/hashmap15.png)
 
 用t2.e表示线程2中的局部变量e，t2.next同理。
 
 **Step2**: t2继续向下执行完本次循环
 
-![hashmap16](http://pnxjswhv3.bkt.clouddn.com/image/hashmap16.png)
+![hashmap16](http://feathers.zrbcool.top/image/hashmap16.png)
 
 **Step3**: t2继续执行下一次循环
 
-![hashmap17](http://pnxjswhv3.bkt.clouddn.com/image/hashmap17.png)
+![hashmap17](http://feathers.zrbcool.top/image/hashmap17.png)
 
 **Step4**: t2继续下一次循环，循环链表出现
 
-![hashmap18](http://pnxjswhv3.bkt.clouddn.com/image/hashmap18.png)
+![hashmap18](http://feathers.zrbcool.top/image/hashmap18.png)
 
 ### 3.2 死循环的出现
 HashMap.get方法源码如下：

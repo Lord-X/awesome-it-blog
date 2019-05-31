@@ -26,7 +26,7 @@
 
 当将redis-master001的910个slot迁移到redis-master007后，业务上开始报下面的异常
 
-![JedisMovedDataException](http://pnxjswhv3.bkt.clouddn.com/image/RedisError.jpg)
+![JedisMovedDataException](http://feathers.zrbcool.top/image/RedisError.jpg)
 
 在马赛克的上一行，可以看到是调Jedis的get方法出的问题。
 
@@ -163,7 +163,7 @@ try {
 
 JedisCluster整体的UML关系如下，先有个整体的印象，在后面的源码分析中，可以再回来看。
 
-![Jedis类图](http://pnxjswhv3.bkt.clouddn.com/image/RedisError2.jpg)
+![Jedis类图](http://feathers.zrbcool.top/image/RedisError2.jpg)
 
 ### 3 为什么通过RedisCluster.get一下可以解决？
 

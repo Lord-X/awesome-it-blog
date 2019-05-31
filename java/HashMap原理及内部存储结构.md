@@ -10,7 +10,7 @@ public static void main(String[] args) {
 ## 1 数据结构说明
 HashMap中本文需要用到的几个字段如下：
 
-![hashmap1](http://pnxjswhv3.bkt.clouddn.com/image/hashmap1.png)
+![hashmap1](http://feathers.zrbcool.top/image/hashmap1.png)
 
 下面说明一下几个字段的含义
 
@@ -21,7 +21,7 @@ transient Node<K,V>[] table;
 ```
 Node的结构如下：
 
-![hashmap](http://pnxjswhv3.bkt.clouddn.com/image/hashmap.png)
+![hashmap](http://feathers.zrbcool.top/image/hashmap.png)
 
 可以发现，Node其实是一个链表，通过next指向下一个元素。
 
@@ -62,7 +62,7 @@ resize方法会初始化一个容量大小为16 的数组，并赋值给table。
 
 此时table数组的状态如下：
 
-![hashmap3](http://pnxjswhv3.bkt.clouddn.com/image/hashmap3.png)
+![hashmap3](http://feathers.zrbcool.top/image/hashmap3.png)
 
 
 ## 4 put过程
@@ -75,7 +75,7 @@ map.put("key0", "value0");
 
 判断 if (table[index] == null) 就new一个Node放到这里，此时为null，所以直接new Node放到3上，此时table如下：
 
-![hashmap4](http://pnxjswhv3.bkt.clouddn.com/image/hashmap4.png)
+![hashmap4](http://feathers.zrbcool.top/image/hashmap4.png)
 
 然后判断当前已使用容量大小(size)是否已经超过临界值threshold，此时size=1，小于12，不做任何操作，put方法结束（如果超过临界值，需要resize扩容）。
 
@@ -84,7 +84,7 @@ map.put("key0", "value0");
 ```$xslt
 map.put("key1", "value1");
 ```
-![hashmap5](http://pnxjswhv3.bkt.clouddn.com/image/hashmap5.png)
+![hashmap5](http://feathers.zrbcool.top/image/hashmap5.png)
 
 ```$xslt
 map.put("key1", "value1");
@@ -99,7 +99,7 @@ map.put("key10", "value10");
 map.put("key11", "value11");
 ```
 
-![hashmap6](http://pnxjswhv3.bkt.clouddn.com/image/hashmap6.png)
+![hashmap6](http://feathers.zrbcool.top/image/hashmap6.png)
 
 此时size=12，下一次put后size为13，大于当前threshold，将触发扩容（resize）
 ```$xslt
@@ -115,7 +115,7 @@ HashMap会创建一个新的Node，并放到table[3]链表的最后面。
 
 此时table状态如下：
 
-![hashmap7](http://pnxjswhv3.bkt.clouddn.com/image/hashmap7.png)
+![hashmap7](http://feathers.zrbcool.top/image/hashmap7.png)
 
 
 ## 5 resize扩容
@@ -229,6 +229,6 @@ for (int j = 0; j < oldCap; ++j) { // oldCap：旧table的大小 =16
 
 扩容后，table状态如下所示：
 
-![hashmap8](http://pnxjswhv3.bkt.clouddn.com/image/hashmap8.png)
+![hashmap8](http://feathers.zrbcool.top/image/hashmap8.png)
 
 最终，重新分配完所有的Node后，扩容结束。

@@ -57,6 +57,6 @@ public void method() {
 
 其内存图示如下
 
-![GC引用计数法-循环引用图示](http://pnxjswhv3.bkt.clouddn.com/image/GC%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E6%B3%95-%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E5%9B%BE%E7%A4%BA.jpg)
+![GC引用计数法-循环引用图示](http://feathers.zrbcool.top/image/GC%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E6%B3%95-%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E5%9B%BE%E7%A4%BA.jpg)
 
 method方法中，执行完两个set后，method方法结束，图中两条红线引用消失，可以看到，留下两个对象在堆内存中循环引用，但此时已经没有地方在用他们了，造成内存泄漏。两个对象就凌乱在风中不知所措了。

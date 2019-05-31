@@ -44,7 +44,7 @@ JDK8之前会加载到内存中的方法区。
 #### 2.1 双亲委派模型原理
 从JDK1.2之后，类加载器引入了双亲委派模型，其模型图如下：
 
-![ClassLoaderParentMod](http://pnxjswhv3.bkt.clouddn.com/image/Classloader.jpg)
+![ClassLoaderParentMod](http://feathers.zrbcool.top/image/Classloader.jpg)
 
 其中，两个用户自定义类加载器的父加载器是AppClassLoader，AppClassLoader的父加载器是ExtClassLoader，ExtClassLoader是没有父类加载器的，在代码中，ExtClassLoader的父类加载器为null。BootstrapClassLoader也并没有子类，因为他完全由JVM实现。
 
@@ -64,7 +64,7 @@ public abstract class ClassLoader {
 ```
 然后通过debug来看一下这个结构，如下图
 
-![ClassLoader委派模型关系图](http://pnxjswhv3.bkt.clouddn.com/image/classloader%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg)
+![ClassLoader委派模型关系图](http://feathers.zrbcool.top/image/classloader%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB%E5%9B%BE.jpg)
 
 这里的第一个红框是我自己定义的类加载器，对应上图的最下层部分；第二个框是自定义类加载器的父类加载器，可以看到是AppClassLoader；第三个框是AppClassLoader的父类加载器，是ExtClassLaoder；第四个框是ExtClassLoader的父类加载器，是null。
 
@@ -284,11 +284,11 @@ public class MyClassLoader {
 
 实验中的ClassLoaderTest类就是一个简单的定义了两个field的Class。如下图所示
 
-![classloadertest](http://pnxjswhv3.bkt.clouddn.com/image/classloadertest.jpg)
+![classloadertest](http://feathers.zrbcool.top/image/classloadertest.jpg)
 
 最终的打印结果如下
 
-![Result](http://pnxjswhv3.bkt.clouddn.com/image/classloaderresult.jpg)
+![Result](http://feathers.zrbcool.top/image/classloaderresult.jpg)
 
 PS: 实验类（ClassLoaderTest）最好不要放在IDE的工程目录内，因为IDE在run的时候会先将工程中的所有类都加载到内存，这样一来这个类就不是自定义类加载器加载的了，而是AppClassLoader加载的。
 
@@ -402,11 +402,11 @@ false
 ##### 3.3.3 另外的说明
 不要尝试自定义java.lang包，并尝试用加载器去加载他们。像下面这样
 
-![selfjavalang](http://pnxjswhv3.bkt.clouddn.com/image/selfclass.jpg)
+![selfjavalang](http://feathers.zrbcool.top/image/selfclass.jpg)
 
 这么干的话，会直接抛出一个异常
 
-![error](http://pnxjswhv3.bkt.clouddn.com/image/javalangerror.jpg)
+![error](http://feathers.zrbcool.top/image/javalangerror.jpg)
 
 这个异常是在调用defineClass的校验过程抛出的，源码如下
 ```

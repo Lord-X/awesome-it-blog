@@ -9,7 +9,7 @@ Java面试中，有一道面试题是这样问的：Java程序是解释执行还
 
 Java程序通常的执行过程如下：
 
-![Java程序执行过程](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A81.jpg)
+![Java程序执行过程](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A81.jpg)
 
 源码.java文件通过javac命令编译成.class的字节码，再通过java命令执行。
 
@@ -52,7 +52,7 @@ JVM在执行时，首先会逐条读取IR的指令来执行，这个过程就是
 
 所以，从.java文件到最终的执行，其过程大致如下：
 
-![Java程序执行过程pro](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A82.jpg)
+![Java程序执行过程pro](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A82.jpg)
 
 （CodeCache会在下文中介绍）
 
@@ -109,7 +109,7 @@ public class JITDemo2 {
 
 执行结果：
 
-![执行结果1](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A83.jpg)
+![执行结果1](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A83.jpg)
 
 编译信息没有打印出来，侧面证明了即时编译器没有参与工作。
 
@@ -119,7 +119,7 @@ public class JITDemo2 {
 
 执行结果：
 
-![执行结果2](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A84.jpg)
+![执行结果2](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A84.jpg)
 
 会产生大量的编译信息
 
@@ -129,7 +129,7 @@ public class JITDemo2 {
 
 执行结果：
 
-![执行结果3](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A85.jpg)
+![执行结果3](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A85.jpg)
 
 **结论：耗时由大到小排序为：纯解释模式 > 纯编译模式 > 混合模式**
 
@@ -173,7 +173,7 @@ public class JITDemo2 {
 ```
 执行结果如下：
 
-![执行结果4](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A86.jpg)
+![执行结果4](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A86.jpg)
 
 由于解释执行时的计数工作并没有严格与编译器同步，所以并不会是严格的10000，其实只要调用次数足够大，就可以视为热点代码，没必要做到严格同步。
 
@@ -204,7 +204,7 @@ public class JITDemo2 {
 
 执行结果：
 
-![执行结果5](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A87.jpg)
+![执行结果5](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A87.jpg)
 
 * 根据方法调用和循环回边
 
@@ -239,7 +239,7 @@ public class JITDemo2 {
 
 执行结果：
 
-![执行结果6](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A88.jpg)
+![执行结果6](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A88.jpg)
 
 ### 3 CodeCache
 CodeCache是热点代码的暂存区，经过即时编译器编译的代码会放在这里，它存在于堆外内存。
@@ -254,7 +254,7 @@ PS：可以通过-XX:+PrintFlagsFinal打印出所有参数的默认值。
 #### 3.1 通过jconsole监控CodeCache
 可以通过JDK自带的jconsole工具看到CodeCache在内存中所处的位置，例如
 
-![CodeCache内存](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A89.jpg)
+![CodeCache内存](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A89.jpg)
 
 从图中曲线图可以看出CodeCache已经使用了4M多。
 
@@ -269,7 +269,7 @@ PS：可以通过-XX:+PrintFlagsFinal打印出所有参数的默认值。
 
 CodeCache被填满时，JVM会打印一条日志：
 
-![CodeCache日志](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A810.jpg)
+![CodeCache日志](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A810.jpg)
 
 JVM针对CodeCache提供了GC方式： -XX:+UseCodeCacheFlushing。在JDK1.7.0_4之后这个参数默认开启，当CodeCache即将填满时会尝试回收。JDK7在这方面的回收做的不是很少，GC收益较低，在JDK8有了很大的改善，所以可以通过升级到JDK8来直接提升这方面的性能。
 
@@ -290,7 +290,7 @@ public int method(boolean flag) {
 
 从解释执行的角度来看，他的执行过程如下：
 
-![CodeCache执行](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A811.jpg)
+![CodeCache执行](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A811.jpg)
 
 但经过即时编译器编译后的代码不一定是这样，即时编译器在编译前会收集大量的执行信息，例如，如果这段代码之前输入的flag值都为true，那么即时编译器可能会将他变异成下面这样：
 
@@ -302,15 +302,15 @@ public int method(boolean flag) {
 
 即下图这样
 
-![CodeCache执行](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A812.jpg)
+![CodeCache执行](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A812.jpg)
 
 但可能后面不总是flag=true，一旦flag传了false，这个错了，此时编译器就会将他“去优化”，变成编译执行方式，在日志中的表现是made not entrant：
 
-![made not entrant](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A813.jpg)
+![made not entrant](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A813.jpg)
 
 此时该方法不能再进入，当JVM检测到所有线程都退出该编译后的made not entrant，会将该方法标记为：made zombie，此时 这块代码占用的内存就是可回收的了。可以通过编译日志看出：
 
-![made zombie](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A814.jpg)
+![made zombie](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A814.jpg)
 
 #### 3.4 CodeCache的调优
 在Java8中提供了一个JVM启动参数：-XX:+PrintCodeCache，他可以在JVM停止时打印CodeCache的使用情况，可以在每次停止应用时观察一下这个值，慢慢调整为一个最合适的大小。
@@ -334,7 +334,7 @@ public class DemoApplication {
 
 这里我将CodeCache定义为256M，并在JVM退出时打印了CodeCache使用情况，日志如下：
 
-![CodeCache out](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A815.jpg)
+![CodeCache out](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A815.jpg)
 
 最多只使用了6721K（max_used），浪费了大量的内存，此时就可以尝试将-XX:ReservedCodeCacheSize=256M调小，将多余的内存分配给别的地方。
 

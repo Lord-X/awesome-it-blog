@@ -55,7 +55,7 @@ class A {
 
 这段代码的运行时内存图示如下：
 
-![可达性分析图1](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%901.jpg)
+![可达性分析图1](http://feathers.zrbcool.top/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%901.jpg)
 
 首先，类加载器加载Test类，会初始化静态变量a，将常量引用指向常量池中的字符串，完成Test类的加载；
 
@@ -63,11 +63,11 @@ class A {
 
 此时GC Roots状态如下：
 
-![可达性分析图2](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%902.jpg)
+![可达性分析图2](http://feathers.zrbcool.top/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%902.jpg)
 
 当main方法执行完出栈后，变为：
 
-![可达性分析图3](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%903.jpg)
+![可达性分析图3](http://feathers.zrbcool.top/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%903.jpg)
 
 第三个对象已经没有引用链可达GC Root，此时，第三个对象被第一次标记。
 
@@ -175,7 +175,7 @@ public class SaveMe {
 
 上述代码很简明，可根据注释理解。代码执行结果如下：
 
-![可达性分析图4](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%904.jpg)
+![可达性分析图4](http://feathers.zrbcool.top/image/%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%904.jpg)
 
 ### 2 不同引用类型的回收
 Java中有四种引用类型，引用强度由强到弱：强引用、软引用、弱引用、虚引用。针对不同的引用类型，GC的回收策略不同。

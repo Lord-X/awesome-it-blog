@@ -1,6 +1,6 @@
 近期线上有个接口响应延迟P99波动较大，后对其进行了优化。响应延迟折线图如下：
 
-![优化前后对比](http://pnxjswhv3.bkt.clouddn.com/image/redis1.jpg)
+![优化前后对比](http://feathers.zrbcool.top/image/redis1.jpg)
 
 在12月11号11点左右优化完成后，P99趋于平稳，平均在70ms左右。
 
@@ -9,7 +9,7 @@
 ### 1 思考接口的执行过程
 这个接口一共会经过三个服务，最终返回给客户端。执行流程如下：
 
-![服务结构](http://pnxjswhv3.bkt.clouddn.com/image/redis2.jpg)
+![服务结构](http://feathers.zrbcool.top/image/redis2.jpg)
 
 按照箭头所示流程，先访问服务1，服务1的结果返回给接口层，在请求服务2，服务2请求服务3，然后将结果返回给接口层。
 
@@ -35,19 +35,19 @@
 
 最后发现单点的Redis响应时间过长
 
-![P99响应](http://pnxjswhv3.bkt.clouddn.com/image/redis3.jpg)
+![P99响应](http://feathers.zrbcool.top/image/redis3.jpg)
 
 如图所示，服务2接受到的每次请求会访问三次这个单点redis，这三次加起来有接近100ms，然后针对这个单点redis进行分析。
 
 发现这台redis的CPU有如下波动趋势
 
-![CPU波动](http://pnxjswhv3.bkt.clouddn.com/image/redis4.jpg)
+![CPU波动](http://feathers.zrbcool.top/image/redis4.jpg)
 
 基本上每一分钟会波动一次。
 
 马上反应过来是开启了bgsave引起的（基本1分钟bgsave一次），因为之前有过类似的经验，就直接关掉bgsave再观察
 
-![关闭bgsave后的CPU波动](http://pnxjswhv3.bkt.clouddn.com/image/redis5.jpg)
+![关闭bgsave后的CPU波动](http://feathers.zrbcool.top/image/redis5.jpg)
 
 至此，业务平稳下来。
 
@@ -67,11 +67,11 @@
 
 所以在平时没有bgsave的时候，进程状态如下：
 
-![无bgsave的进程状态](http://pnxjswhv3.bkt.clouddn.com/image/redis6.jpg)
+![无bgsave的进程状态](http://feathers.zrbcool.top/image/redis6.jpg)
 
 bgsave时，进程状态如下：
 
-![开启bgsave的进程状态](http://pnxjswhv3.bkt.clouddn.com/image/redis7.jpg)
+![开启bgsave的进程状态](http://feathers.zrbcool.top/image/redis7.jpg)
 
 最上面CPU占用100%的就是fork出来的子进程，在执行bgsave，同时他完全独占了一个CPU（上面的红框）。
 
@@ -170,7 +170,7 @@ fork()方法返回值的描述：
 
 由此可见，fork的执行流程如下：
 
-![fork的执行流程](http://pnxjswhv3.bkt.clouddn.com/image/redis8.jpg)
+![fork的执行流程](http://feathers.zrbcool.top/image/redis8.jpg)
 
 再来看看Linux中关于fork()的注意事项。
 
@@ -186,7 +186,7 @@ fork()方法返回值的描述：
 ### 7 补充-进程的内存模型
 系统内核会为每一个进程开辟一块虚拟内存空间，其分布如下
 
-![虚拟内存空间图示](http://pnxjswhv3.bkt.clouddn.com/image/redis9.jpg)
+![虚拟内存空间图示](http://feathers.zrbcool.top/image/redis9.jpg)
 
 fork的子进程相当于父进程的一个clone，可见，如果父进程中数据量比较多的话，clone的耗时会比较长。
 

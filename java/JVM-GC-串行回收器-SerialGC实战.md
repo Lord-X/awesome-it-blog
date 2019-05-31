@@ -8,7 +8,7 @@ Serial GC的名字能很好地概括他的特点：串行。它与应用线程�
 
 所以，整个Java进程执行起来就行下面的样子：
 
-![SerialGC1](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC1.jpg)
+![SerialGC1](http://feathers.zrbcool.top/image/SerialGC1.jpg)
 
 Serial GC使用的是分代算法，在新生代上，Serial使用复制算法进行收集，在老年代上，Serial使用标记-压缩算法进行收集。
 
@@ -145,7 +145,7 @@ Java8会默认使用分层编译的机制，会自动选择在何时使用哪个
 -XX:+UseSerialGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps
 ```
 * 实践
-![SerialGC2](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC2.jpg)
+![SerialGC2](http://feathers.zrbcool.top/image/SerialGC2.jpg)
 
 依然用上面的Hello SerialGC程序，运行结果如下
 
@@ -277,7 +277,7 @@ Metaspace       used 3381K, capacity 4568K, committed 4864K, reserved 1056768K
 
 整个内存初始状态如下：
 
-![SerialGC3](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC3.jpg)
+![SerialGC3](http://feathers.zrbcool.top/image/SerialGC3.jpg)
 
 ```java
 created byte[]: 0
@@ -287,11 +287,11 @@ created byte[]: 1
 
 创建了两个10M的对象（记为ID：0，ID：1），并且没有设置成可回收对象，由于Eden区目前最起码还有一个Random对象，所以在给第三个对象申请内存时，发现Eden区内存不足，触发了GC。
 
-![SerialGC4](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC4.jpg)
+![SerialGC4](http://feathers.zrbcool.top/image/SerialGC4.jpg)
 
 新生代在GC后变为870K，说明Random对象被复制到from区，而两个10M的对象都直接晋升到了老年代。
 
-![SerialGC5](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC5.jpg)
+![SerialGC5](http://feathers.zrbcool.top/image/SerialGC5.jpg)
 
 ```java
 created byte[]: 2
@@ -301,11 +301,11 @@ created byte[] and set to null: 3
 
 创建了ID：2和ID：3对象，并把ID：3设置为可回收对象
 
-![SerialGC6](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC6.jpg)
+![SerialGC6](http://feathers.zrbcool.top/image/SerialGC6.jpg)
 
 GC会将Eden区的对象和from区的对象尝试复制到to区，ID：3对象直接回收（通过堆空间的容量变化可以看出：42421K->31437K），ID：2对象在to区中放不下，晋升老年代
 
-![SerialGC7](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC7.jpg)
+![SerialGC7](http://feathers.zrbcool.top/image/SerialGC7.jpg)
 
 一直到创建ID：12，ID：13，都与上述过程类似，并且没有产生过垃圾对象，但创建完ID：13对象后，老年代的已使用内存达到了130M+，如下：
 
@@ -325,14 +325,14 @@ created byte[]: 15
 
 GC前如下所示
 
-![SerialGC8](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC8.jpg)
+![SerialGC8](http://feathers.zrbcool.top/image/SerialGC8.jpg)
 
 
 在新生代GC时，要把ID：14，ID：15的对象复制到老年代，但此时老年代已经不足以容纳这两个对象，此时会触发老年代的GC。
 
 即日志中的Tenured部分。但发现没有任何对象可以回收，然后尝试复制了Eden区的一个对象到老年代
 
-![SerialGC9](http://pnxjswhv3.bkt.clouddn.com/image/SerialGC9.jpg)
+![SerialGC9](http://feathers.zrbcool.top/image/SerialGC9.jpg)
 
 然后继续创建对象，会继续尝试Full GC，Full GC无果，最终发生内存溢出。
 

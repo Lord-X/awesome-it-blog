@@ -26,7 +26,7 @@ Java7引入了分层编译，使用-XX:+TieredCompilation参数开启，它综�
 
 下图显示了几种可能的编译执行路径。
 
-![编译执行路径](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A816.jpg)
+![编译执行路径](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A816.jpg)
 
 第一条执行路径，指的是在通常情况下，热点方法会被3层的C1编译，然后被4层的C2编译。
 
@@ -235,21 +235,21 @@ java7默认JVM参数情况下的CPU使用率和复杂变化（不开启分层编
 
 CPU使用率：
 
-![CPU使用率](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A817.jpg)
+![CPU使用率](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A817.jpg)
 
 CPU负载：
 
-![CPU负载](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A818.jpg)
+![CPU负载](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A818.jpg)
 
 Java8默认JVM参数情况下的CPU使用率和复杂变化（开启分层编译）：
 
 CPU使用率：
 
-![CPU使用率](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A819.jpg)
+![CPU使用率](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A819.jpg)
 
 CPU负载：
 
-![CPU负载](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A820.jpg)
+![CPU负载](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A820.jpg)
 
 由此可以看出，同为即时编译器默认参数情况下，java8在启动性能上提升了很多。
 
@@ -261,11 +261,11 @@ CPU负载：
 
 CPU使用率的变化：
 
-![CPU使用率](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A821.jpg)
+![CPU使用率](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A821.jpg)
 
 CPU负载的变化：
 
-![CPU负载](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A822.jpg)
+![CPU负载](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A822.jpg)
 
 由此可见分层编译的开启有利于提升应用的启动性能。
 
@@ -294,7 +294,7 @@ PS：CodeCache的GC笔者没有研究过，所以这里GC对其的影响也是�
 
 结果如下：
 
-![JVM默认值](http://pnxjswhv3.bkt.clouddn.com/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A823.jpg)
+![JVM默认值](http://feathers.zrbcool.top/image/%E5%8D%B3%E6%97%B6%E7%BC%96%E8%AF%91%E5%99%A823.jpg)
 
 ### 5 参考文档
 
