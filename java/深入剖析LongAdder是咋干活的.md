@@ -14,7 +14,15 @@ LongAdder是JDK8添加到JUC中的。它是一个线程安全的、比Atomic*系
 
 ### 0 LongAdder的类图
 
+![LongAdder类图](http://image.feathers.top/image/LongAdder类图.png)
 
+LongAdder本身没有成员变量，其值的变更实际上是由父类Striped64管理的。
+
+Striped64通过两个成员变量来管理value，分别是base和cells，cells是一个数组，其元素是Striped64的内部类Cell的实现，Cell很简单，只记录一个value。
+
+当LongAdder不存在并发访问的时候，会直接通过cas的方式更新base的值，存在并发访问时，会定位到某一个cell，修改cell的value。
+
+最终，value = base + sum(cells)。
 
 ### 1 深挖add方法
 
