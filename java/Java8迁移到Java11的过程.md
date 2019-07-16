@@ -75,3 +75,20 @@ Java HotSpot(TM) 64-Bit Server VM warning: Ignoring option MaxPermSize; support 
 
 其他的问题按照同样的思路解决即可。
 
+### 3 远程debug问题
+
+Java9以后的版本，JPDA的address配置格式发生了一些变化。
+
+Java8及以前，用如下形式：
+
+```text
+-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n
+```
+
+Java9及以后，改为下面这样，否则无法链接到远程端口：
+
+```text
+# 区别在于address，要变成 *:PORT 格式
+-Xdebug -Xrunjdwp:transport=dt_socket,address=*:8000,server=y,suspend=n
+```
+
