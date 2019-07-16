@@ -92,3 +92,15 @@ Java9及以后，改为下面这样，否则无法链接到远程端口：
 -Xdebug -Xrunjdwp:transport=dt_socket,address=*:8000,server=y,suspend=n
 ```
 
+**原因：**
+
+可参考StackOverflow的一个issue：[What are Java command line options to set to allow JVM to be remotely debugged?](https://stackoverflow.com/questions/138511/what-are-java-command-line-options-to-set-to-allow-jvm-to-be-remotely-debugged/48396996#48396996)
+
+大概是说，Java9及以后的版本默认只支持本地连接到debug，即address=8000，这个格式默认解析出来的IP是localhost，改成address=*:8000后，可匹配任何IP。
+
+![JDWP](http://image.feathers.top/image/JDWP.png)
+
+**延伸：**
+
+Java5之前，使用-Xdebug和-Xrunjdwp来告知jvm运行在debug模式下，这个方式在以后的版本中仍然适用，但在此模式下运行的JVM，只会在解释执行的模式下运行，不会有JIT的参与，所以运行较慢，因此生产环境一定不要开启这个参数。
+
