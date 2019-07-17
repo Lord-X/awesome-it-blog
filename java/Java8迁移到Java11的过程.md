@@ -104,3 +104,8 @@ Java9及以后，改为下面这样，否则无法链接到远程端口：
 
 Java5之前，使用-Xdebug和-Xrunjdwp来告知jvm运行在debug模式下，这个方式在以后的版本中仍然适用，但在此模式下运行的JVM，只会在解释执行的模式下运行，不会有JIT的参与，所以运行较慢，因此生产环境一定不要开启这个参数。
 
+### 后续...
+
+采坑仍在继续，会在GitHub上持续更新。
+
+[GitHub_Mr羽墨青衫](https://github.com/Lord-X/awesome-it-blog/blob/master/java/Java8%E8%BF%81%E7%A7%BB%E5%88%B0Java11%E7%9A%84%E8%BF%87%E7%A8%8B.md)
