@@ -282,13 +282,11 @@ jaotc --output libjava.base.tiered.so --compile-for-tiered --module java.base
 ![分层编译AOT启动](http://image.feathers.top/image/分层编译AOT启动.png)
 
 * CPU
-
 ![分层编译AOT启动CPU消耗](http://image.feathers.top/image/分层编译AOT启动CPU消耗.png)
 
 主要在C2编译器上。
 
 * 与没有AOT的性能对比
-
 ![分层编译AOT接口性能对比](http://image.feathers.top/image/分层编译AOT接口性能对比.png)
 
 看上去好了一些。
