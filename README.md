@@ -27,6 +27,8 @@
    * [深入解读HashMap线程安全性问题](https://github.com/Lord-X/awesome-it-blog/blob/master/java/%E6%B7%B1%E5%85%A5%E8%A7%A3%E8%AF%BBHashMap%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E9%97%AE%E9%A2%98.md)
    * [关于Ahead-of-Time Compilation的调研与实践](https://github.com/Lord-X/awesome-it-blog/blob/master/java/%E5%85%B3%E4%BA%8EAhead-of-Time%20Compilation%E7%9A%84%E8%B0%83%E7%A0%94%E4%B8%8E%E5%AE%9E%E8%B7%B5.md)
    * [Java Flight Recorder初探](https://github.com/Lord-X/awesome-it-blog/blob/master/java/Java%20Flight%20Recorder%E5%88%9D%E6%8E%A2.md)
+   * [关于Graal编译器的调研与实践](https://github.com/Lord-X/awesome-it-blog/blob/master/java/%E5%85%B3%E4%BA%8EGraal%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E8%B0%83%E7%A0%94%E4%B8%8E%E5%AE%9E%E8%B7%B5.md)
+   * [阿里JDK：Dragonwell8中JWarmup的调研与实践](https://github.com/Lord-X/awesome-it-blog/blob/master/java/%E9%98%BF%E9%87%8CJDK%EF%BC%9ADragonwell8%E4%B8%ADJWarmup%E7%9A%84%E8%B0%83%E7%A0%94%E4%B8%8E%E5%AE%9E%E8%B7%B5.md)
    
 * [Database](https://github.com/Lord-X/awesome-it-blog/tree/master/DB)
    * [详细解读阿里手册之MySQL](https://github.com/Lord-X/awesome-it-blog/blob/master/DB/%E8%AF%A6%E7%BB%86%E8%A7%A3%E8%AF%BB%E9%98%BF%E9%87%8C%E6%89%8B%E5%86%8C%E4%B9%8BMySQL.md)
