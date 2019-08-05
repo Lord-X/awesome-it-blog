@@ -41,3 +41,6 @@
 * [kubernetes](https://github.com/Lord-X/awesome-it-blog/tree/master/k8s)
    * [酷划商业平台容器化历程](https://github.com/Lord-X/awesome-it-blog/blob/master/k8s/%E9%85%B7%E5%88%92%E5%95%86%E4%B8%9A%E5%B9%B3%E5%8F%B0%E5%AE%B9%E5%99%A8%E5%8C%96%E5%8E%86%E7%A8%8B.md)
    * [附_酷划商业平台容器化后性能对比](https://github.com/Lord-X/awesome-it-blog/blob/master/k8s/%E9%99%84_%E9%85%B7%E5%88%92%E5%95%86%E4%B8%9A%E5%B9%B3%E5%8F%B0%E5%AE%B9%E5%99%A8%E5%8C%96%E5%90%8E%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94.md)
+   
+* [motan](https://github.com/Lord-X/awesome-it-blog/tree/master/Motan)
+   * [Motan_如何完成与Spring的集成](https://github.com/Lord-X/awesome-it-blog/blob/master/Motan/Motan_%E5%A6%82%E4%BD%95%E5%AE%8C%E6%88%90%E4%B8%8ESpring%E7%9A%84%E9%9B%86%E6%88%90.md)
