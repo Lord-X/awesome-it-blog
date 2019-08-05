@@ -288,3 +288,19 @@ public Object postProcessAfterInitialization(Object bean, String beanName) throw
 }
 ```
 
+`postProcessBeforeInitialization` 方法用于解析Bean中带有@MotanReferer注解的setter方法或field，并完成调用方的初始化。
+
+`postProcessAfterInitialization` 方法用于解析带有@MotanService注解的class，并将这个class作为motan服务注册到注册中心，暴露为服务。
+
+
+### 2 总结
+
+motan也有原生的服务暴露形式，本文没有介绍，具体可以参考官方wiki。
+
+motan主要利用Spring启动时加载并初始化 `META-INF/spring.handlers` 来完成与Spring的集成。
+
+在xml配置形式下，motan用 `MotanNamespaceHandler` 完成标签解析器的注册。
+
+在Annotation配置形式下，motan主要利用 `BeanFactoryPostProcessor` 和 `BeanPostProcessor` 介入Bean生命周期，用 `BeanFactoryPostProcessor` 实现了class的扫描，用 `BeanPostProcessor` 实现了两个核心注解 `@MotanReferer` 和 `@MotanService` 的解析。
+
+
