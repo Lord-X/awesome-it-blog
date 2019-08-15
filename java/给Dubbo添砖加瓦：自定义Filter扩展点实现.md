@@ -238,4 +238,4 @@ String CONSUMER = "consumer";
 ### 参考
 
 * [https://dubbo.apache.org/zh-cn/docs/dev/impls/filter.html](https://dubbo.apache.org/zh-cn/docs/dev/impls/filter.html)
-* [https://dubbo.apache.org/zh-cn/docs/dev/impls/filter.html](https://dubbo.apache.org/zh-cn/docs/dev/SPI.html)
+* [https://dubbo.apache.org/zh-cn/docs/dev/SPI.html](https://dubbo.apache.org/zh-cn/docs/dev/SPI.html)
