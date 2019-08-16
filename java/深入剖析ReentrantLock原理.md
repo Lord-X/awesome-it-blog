@@ -157,7 +157,7 @@ public ReentrantLock(boolean fair) {
 
 sync是ReentrantLock的成员变量，是其内部类Sync的实例。NonfairSync和FairSync都是Sync类的子类。可以参考如下类关系图：
 
-![ReentrantLock类关系图](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/1_ReentrantLock%E7%B1%BB%E5%9B%BE.png)
+![ReentrantLock类关系图](http://image.feathers.top/image/ReentrantLock类图.png)
 
 Sync继承了AQS，所以他具备了AQS的功能。同样的，NonfairSync和FairSync都是AQS的子类。
 
@@ -245,7 +245,7 @@ protected final boolean tryRelease(int releases) {
 
 这个过程大概可以描述为下图这样子：
 
-![非公平锁的竞争](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/2_%E9%9D%9E%E5%85%AC%E5%B9%B3%E9%94%81%E7%9A%84%E7%AB%9E%E4%BA%89.png)
+![非公平锁的竞争](http://image.feathers.top/image/ReentrantLock非公平锁的竞争.png)
 
 ### 3 公平锁的实现原理
 
@@ -294,7 +294,7 @@ static final class FairSync extends Sync {
 
 这个过程大概可以描述为下图这样子：
 
-![公平锁的竞争](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90ReentrantLock%E5%8E%9F%E7%90%86/3_%E5%85%AC%E5%B9%B3%E9%94%81%E7%9A%84%E7%AB%9E%E4%BA%89.png)
+![公平锁的竞争](http://image.feathers.top/image/ReentrantLock公平锁的实现原理.png)
 
 
 ### 4 tryLock原理
