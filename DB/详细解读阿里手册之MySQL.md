@@ -142,10 +142,10 @@ float和double在设置超过定义长度的数值时，会自动四舍五入，
 select count(*) from user_game_info; // 共有956176条数据
 
 select * from user_game_info a limit 900000, 20; // 此查询耗时0.547S
-![优化前](http://pnxjswhv3.bkt.clouddn.com/image/db1.jpg)
+![优化前](http://feathers.zrbcool.top/image/db1.jpg)
 
 select t1.* from user_game_info t1, (select id from user_game_info limit 900000, 20) t2 where t1.id = t2.id; // 优化后耗时0.178S
-![优化后](http://pnxjswhv3.bkt.clouddn.com/image/db2.jpg)
+![优化后](http://feathers.zrbcool.top/image/db2.jpg)
 
 >【推荐】 SQL 性能优化的目标：至少要达到 range 级别， 要求是 ref 级别， 如果可以是 consts最好。
 * 说明：
@@ -174,7 +174,7 @@ select t1.* from user_game_info t1, (select id from user_game_info limit 900000,
 
 6）Const:将主键放到where后面做等值查询，例如：select * from user_game_info where id = 100;
 
-![常量索引](http://pnxjswhv3.bkt.clouddn.com/image/db3.jpg)
+![常量索引](http://feathers.zrbcool.top/image/db3.jpg)
 
 >【推荐】建组合索引的时候，区分度最高的在最左边。
 * 正例： 如果 where a=? and b=? ， 如果 a 列的几乎接近于唯一值，那么只需要单建 idx_a索引即可。
@@ -184,10 +184,10 @@ select t1.* from user_game_info t1, (select id from user_game_info limit 900000,
 * 解读：例如，给上文提到的tb_user_account表的username(varchar)字段加索引，由于字段是varchar类型的，所以上图中的查询类型匹配，命中索引，下图是用int类型匹配的，无法命中索引。
 
 以字符串形式查找，命中索引
-![字符串命中索引](http://pnxjswhv3.bkt.clouddn.com/image/db4.jpg)
+![字符串命中索引](http://feathers.zrbcool.top/image/db4.jpg)
 
 因隐式转换，未命中索引
-![数值未命中索引](http://pnxjswhv3.bkt.clouddn.com/image/db5.jpg)
+![数值未命中索引](http://feathers.zrbcool.top/image/db5.jpg)
 
 
 隐式转换规则：
