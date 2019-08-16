@@ -41,7 +41,7 @@ Java是一个安全的面向对象的编程语言。这里的安全指的是什�
 
 点下面这里下载即可
 
-![OpenJDK8下载](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/Unsafe%E7%B1%BB%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8/OpenJDK8%E4%B8%8B%E8%BD%BD.jpeg?raw=true)
+![OpenJDK8下载](http://image.feathers.top/image/unsafe1.png)
 
 下载后是zip包，解压到一个地方就好。
 
@@ -55,15 +55,19 @@ http://137.254.56.27/download/trunk/nightly/latest
 
 注意要下载这个ALL版本的，只有这个才能同时支持Java和C++。
 
-![NetBeans下载](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/Unsafe%E7%B1%BB%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8/NetBeans%E4%B8%8B%E8%BD%BD.jpeg?raw=true)
+![NetBeans下载](http://image.feathers.top/image/unsafe2.png)
 
 #### 1.3 导入OpenJDK源码
 
 * 文件 -> 新建项目
 * 按下面这样选择，然后下一步
-![openjdk_import1](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/Unsafe%E7%B1%BB%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8/openjdk_import1.jpeg?raw=true)
+
+![openjdk_import1](http://image.feathers.top/image/unsafe3.png)
+
 * 选择刚才解压出来的openjdk根目录
-![openjdk_import2](https://github.com/Lord-X/awesome-it-blog/blob/master/images/java/Unsafe%E7%B1%BB%E7%9A%84%E4%BB%8B%E7%BB%8D%E5%92%8C%E4%BD%BF%E7%94%A8/openjdk_import2.jpeg?raw=true)
+
+![openjdk_import2](http://image.feathers.top/image/unsafe4.png)
+
 * 点击“完成”
 
 Unsafe的源码在jdk/src/share/classes/sun/misc/Unsafe.java
