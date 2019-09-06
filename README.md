@@ -44,3 +44,9 @@
    
 * [motan](https://github.com/Lord-X/awesome-it-blog/tree/master/Motan)
    * [Motan_如何完成与Spring的集成](https://github.com/Lord-X/awesome-it-blog/blob/master/Motan/Motan_%E5%A6%82%E4%BD%95%E5%AE%8C%E6%88%90%E4%B8%8ESpring%E7%9A%84%E9%9B%86%E6%88%90.md)
+   * [Motan_SPI插件扩展机制](https://github.com/Lord-X/awesome-it-blog/blob/master/Motan/Motan_SPI%E6%8F%92%E4%BB%B6%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6.md)
+
+* [others](https://github.com/Lord-X/awesome-it-blog/tree/master/others)
+   * [Pepper Metrics - Spring or Spring Boot应用性能监控利器](https://github.com/Lord-X/awesome-it-blog/blob/master/others/Pepper%20Metrics%20-%20Spring%20or%20Spring%20Boot%E5%BA%94%E7%94%A8%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7%E5%88%A9%E5%99%A8.md)
+   * [酷划在线商业平台技术架构演进历程](https://github.com/Lord-X/awesome-it-blog/blob/master/others/%E9%85%B7%E5%88%92%E5%9C%A8%E7%BA%BF%E5%95%86%E4%B8%9A%E5%B9%B3%E5%8F%B0%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E5%8E%86%E7%A8%8B.md)
+   
