@@ -1,3 +1,12 @@
+## 开源推荐
+推荐一款一站式性能监控工具（开源项目）
+
+[Pepper-Metrics](https://github.com/zrbcool/pepper-metrics)是跟一位同事一起开发的开源组件，主要功能是通过比较轻量的方式与常用开源组件（jedis/mybatis/motan/dubbo/servlet）集成，收集并计算metrics，并支持输出到日志及转换成多种时序数据库兼容数据格式，配套的grafana dashboard友好的进行展示。项目当中原理文档齐全，且全部基于SPI设计的可扩展式架构，方便的开发新插件。另有一个基于docker-compose的独立demo项目可以快速启动一套demo示例查看效果[https://github.com/zrbcool/pepper-metrics-demo](https://github.com/zrbcool/pepper-metrics-demo)。如果大家觉得有用的话，麻烦给个star，也欢迎大家参与开发，谢谢：）
+
+---
+
+## 进入正题...
+
 GC的出现解放了程序员需要手动回收内存的苦恼，但我们也是要了解GC的，知己知彼，百战不殆嘛。
 
 常见的GC回收算法主要包括引用计数算法、可达性分析法、标记清除算法、复制算法、标记压缩算法、分代算法以及分区算法。
