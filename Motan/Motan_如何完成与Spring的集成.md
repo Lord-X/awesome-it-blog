@@ -1,3 +1,10 @@
+## Motan系列文章
+
+* [Motan如何完成与Spring的集成](https://github.com/Lord-X/awesome-it-blog/blob/master/Motan/Motan_%E5%A6%82%E4%BD%95%E5%AE%8C%E6%88%90%E4%B8%8ESpring%E7%9A%84%E9%9B%86%E6%88%90.md)
+* [Motan的SPI插件扩展机制](https://github.com/Lord-X/awesome-it-blog/blob/master/Motan/Motan_SPI%E6%8F%92%E4%BB%B6%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6.md)
+
+---
+
 Motan是新浪微博研发并开源的一个RPC框架，与Dubbo相比，他更轻量级一些，代码也更少一些，但也五脏俱全。
 
 Motan在GitHub上的项目地址：[https://github.com/weibocom/motan](https://github.com/weibocom/motan)
