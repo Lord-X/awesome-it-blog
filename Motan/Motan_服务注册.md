@@ -86,7 +86,7 @@ private final Set<ServiceConfigBean<?>> serviceConfigs = new ConcurrentHashSet<S
 
 至此 `@MotanService` 解析完成，可以准备发布并注册服务了。
 
-### 2 服务的注册
+### 2 服务的启动
 
 完成上述的解析和初始化后，会调用 `ServiceConfigBean` 的 `export()` 方法来发布并注册服务。
 
@@ -108,11 +108,13 @@ public synchronized void export() { // 这里加了个并发的控制，锁使�
     // 检查暴露的方法是否在接口中存在，如果没有则抛出异常
     checkInterfaceAndMethods(interfaceClass, methods);
 
+    // 解析注册中心地址，并将host、port等参数封装到URL类中
     List<URL> registryUrls = loadRegistryUrls();
     if (registryUrls == null || registryUrls.size() == 0) {
         throw new IllegalStateException("Should set registry config for service:" + interfaceClass.getName());
     }
 
+    // 解析协议和服务暴露的端口，默认为 `motan` 协议。Map的结构为：<协议, 端口>
     Map<String, Integer> protocolPorts = getProtocolAndPort();
     for (ProtocolConfig protocolConfig : protocols) {
         Integer port = protocolPorts.get(protocolConfig.getId());
@@ -120,9 +122,164 @@ public synchronized void export() { // 这里加了个并发的控制，锁使�
             throw new MotanServiceException(String.format("Unknow port in service:%s, protocol:%s", interfaceClass.getName(),
                     protocolConfig.getId()));
         }
+        // 注册并暴露服务
         doExport(protocolConfig, port, registryUrls);
     }
 
     afterExport();
 }
 ```
+
+> PS：URL这个类是Motan自己定义的类，Motan中几乎所有跟URL相关的东西都用它封装。
+
+上述代码先初始化了暴露服务之前需要的一些数据：注册中心地址、服务协议、暴露端口等，真正执行服务注册的是 `doExport` 方法。这个方法较长，这里只贴出关键部分。
+
+```java
+private void doExport(ProtocolConfig protocolConfig, int port, List<URL> registryURLs) {
+    // ... 省略 ...
+    // 省略部分代码主要作用是处理下面这行URL中的参数，例如：protocolName -> motan，hostAddress -> 本机IP，port -> 暴露端口 等
+    // map是解析出来的配置，以及一些默认配置，例如：
+    /*
+    "haStrategy" -> "failover"
+    "module" -> "ad-common"
+    "check" -> "false"
+    "nodeType" -> "service"
+    "version" -> "1.1.0"
+    "filter" -> "cafTracing,pepperProfiler,sentinelProfiler"
+    "minWorkerThread" -> "20"
+    "retries" -> "1"
+    "protocol" -> "motan"
+    "application" -> "ad-common"
+    "maxWorkerThread" -> "200"
+    "shareChannel" -> "true"
+    "refreshTimestamp" -> "1571821305290"
+    "id" -> "ad-commonBasicServiceConfigBean"
+    "export" -> "ad-commonProtocolConfigBean:8022"
+    "requestTimeout" -> "30000"
+    "group" -> "ad-common"
+     */
+    URL serviceUrl = new URL(protocolName, hostAddress, port, interfaceClass.getName(), map);
+    // 校验服务是否已经存在
+    // 注册完成的服务会添加到一个set中，serviceExists方法就是检查这个set中是否已经包含了这个服务的描述符（描述符的格式大概是host、port、protocol、version、nodeType组合的字符串）
+    // serviceUrl就是这个东西：motan://192.168.100.14:8022/com.coohua.ad.common.remote.api.AdCommonRPC?group=ad-common
+    if (serviceExists(serviceUrl)) {
+        LoggerUtil.warn(String.format("%s configService is malformed, for same service (%s) already exists ", interfaceClass.getName(),
+                serviceUrl.getIdentity()));
+        throw new MotanFrameworkException(String.format("%s configService is malformed, for same service (%s) already exists ",
+                interfaceClass.getName(), serviceUrl.getIdentity()), MotanErrorMsgConstant.FRAMEWORK_INIT_ERROR);
+    }
+
+    List<URL> urls = new ArrayList<URL>();
+
+    // injvm 协议只支持注册到本地，其他协议可以注册到local、remote
+    if (MotanConstants.PROTOCOL_INJVM.equals(protocolConfig.getId())) {
+        // ... 省略，主要关注下面的注册中心暴露服务
+    } else {
+        for (URL ru : registryURLs) {
+            urls.add(ru.createCopy()); // 这里是一个浅拷贝，只是new了一个URL，具体字段用的还是之前的引用。
+        }
+    }
+
+    // registereUrls 是注册中心的URL
+    for (URL u : urls) {
+        u.addParameter(URLParamType.embed.getName(), StringTools.urlEncode(serviceUrl.toFullStr()));
+        registereUrls.add(u.createCopy());
+    }
+
+    ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(MotanConstants.DEFAULT_VALUE);
+
+    // 到注册中心注册服务，urls是注册中心的地址
+    exporters.add(configHandler.export(interfaceClass, ref, urls));
+}
+```
+
+最后调用 `configHandler.export` 注册时，经过上面的解析过程，url的parameters参数中已经包含了注册需要用到的信息，例如：
+```text
+"path" -> "com.weibo.api.motan.registry.RegistryService"
+"address" -> "192.168.103.254:2181"
+"application" -> null
+"name" -> "direct"
+"connectTimeout" -> "3000"
+"id" -> "ad-commonRegistryConfigBean"
+"refreshTimestamp" -> "1571821250310"
+"embed" -> "motan%3A%2F%2F192.168.100.14%3A8022%2Fcom.coohua.ad.common.remote.api.AdCommonRPC%3FhaStrategy%3Dfailover%26module%3Dad-common%26check%3Dfalse%26nodeType%3Dservice%26version%3D1.1.0%26filter%3DcafTracing%2CpepperProfiler%2CsentinelProfiler%26minWorkerThread%3D20%26retries%3D1%26protocol%3Dmotan%26application%3Dad-common%26maxWorkerThread%3D200%26shareChannel%3Dtrue%26refreshTimestamp%3D1571821305290%26id%3Dad-commonBasicServiceConfigBean%26export%3Dad-commonProtocolConfigBean%3A8022%26requestTimeout%3D30000%26group%3Dad-common%26"
+"requestTimeout" -> "1000"
+```
+
+接下来看一下 `configHandler.export` 做了什么事情。
+
+```java
+public <T> Exporter<T> export(Class<T> interfaceClass, T ref, List<URL> registryUrls) {
+    // 解码url -> motan://192.168.100.14:8022/com.coohua.ad.common.remote.api.AdCommonRPC?group=ad-common
+    String serviceStr = StringTools.urlDecode(registryUrls.get(0).getParameter(URLParamType.embed.getName()));
+    URL serviceUrl = URL.valueOf(serviceStr);
+
+    // export service
+    String protocolName = serviceUrl.getParameter(URLParamType.protocol.getName(), URLParamType.protocol.getValue());
+    // SPI的方式拿到具体的Protocol实现，默认情况下拿到 motan 的 Protocol
+    Protocol orgProtocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName);
+    Provider<T> provider = getProvider(orgProtocol, ref, serviceUrl, interfaceClass);
+
+    Protocol protocol = new ProtocolFilterDecorator(orgProtocol);
+    // 在这里走Motan的filter chain，并启动服务，filter chain通过调用 ProtocolFilterDecorator 的 decorateWithFilter 方法实现
+    // 走完filter chain后，会调用 orgProtocol 的 export 方法来暴露服务，这个方法的实现在 AbstractProtocol 类中
+    Exporter<T> exporter = protocol.export(provider, serviceUrl);
+
+    // 在注册中心中注册服务
+    register(registryUrls, serviceUrl);
+
+    return exporter;
+}
+```
+
+在 `AbstractProtocol` 的 `export` 方法中会调用 `createExporter` 方法创建一个 `Exporter` 类的实例（具体来说是 `DefaultRpcExporter`），在这个创建过程中会调用 `NettyEndpointFactory` 的 `createServer` 方法创建一个Server出来，并存放在exporter的server变量中。
+
+然后调用 `exporter` 的 `init` 方法，在 `init` 方法中又调用了 `doInit` 方法，这个方法调用了 `server.open()`，至此，服务启动，并监听在本机指定的端口上。
+
+```java
+@Override
+protected boolean doInit() {
+    boolean result = server.open();
+
+    return result;
+}
+```
+
+### 3 服务的注册
+
+此时服务已经成功启动了，但还没注册到注册中心，所以还不能被发现。接下来，继续上面的代码，看一下 `register(registryUrls, serviceUrl);` 这行代码干了啥。
+
+此时两个参数的值分别是：
+* registryUrls: zookeeper://192.168.103.254:2181/com.weibo.api.motan.registry.RegistryService?group=default_rpc
+* serviceUrl: motan://192.168.100.14:8022/com.coohua.ad.common.remote.api.AdCommonRPC?group=ad-common
+
+这个方法的实现如下：
+
+```java
+private void register(List<URL> registryUrls, URL serviceUrl) {
+
+    for (URL url : registryUrls) {
+        // 根据protocol的名称获取具体的 RegistryFactory ，这里以 zookeeper 为例
+        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(url.getProtocol());
+        if (registryFactory == null) {
+            throw new MotanFrameworkException(new MotanErrorMsg(500, MotanErrorMsgConstant.FRAMEWORK_REGISTER_ERROR_CODE,
+                    "register error! Could not find extension for registry protocol:" + url.getProtocol()
+                            + ", make sure registry module for " + url.getProtocol() + " is in classpath!"));
+        }
+        // 尝试获取url对应registry已有的实例，如果没有，就创建一个
+        // 这里zookeeper是用ZkClient管理的
+        Registry registry = registryFactory.getRegistry(url);
+        // 在zk中创建Node，完成服务的注册
+        registry.register(serviceUrl);
+    }
+}
+```
+
+ZK中的注册结果：
+
+```text
+[zk: localhost:2181(CONNECTED) 0] ls /motan/ad-common/com.coohua.ad.common.remote.api.AdCommonRPC/server
+[192.168.100.14:8022]
+```
+
+至此，服务就可以被调用方发现了。
