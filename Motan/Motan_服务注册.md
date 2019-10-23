@@ -283,3 +283,9 @@ ZK中的注册结果：
 ```
 
 至此，服务就可以被调用方发现了。
+
+最后转载一张图总结一下上面的过程
+
+![Motan服务注册](http://image.feathers.top/image/Motan服务注册.png)
+
+图片来源：[https://fdx321.github.io/2017/07/23/【Motan源码学习】4-服务发布和引用/](https://fdx321.github.io/2017/07/23/【Motan源码学习】4-服务发布和引用/)
