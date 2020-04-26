@@ -5,7 +5,7 @@ Http缓存的主要原理是为当前请求复用之前请求的响应，其主�
 
 ### Http缓存的基本交互流程
 
-下图以4个Case说明Browser向Server获取a.png这个资源的集中Cache交互场景。
+下图以4个Case说明Browser向Server获取a.png这个资源的几种Cache交互场景。
 
 ![HttpCache交互](http://image.feathers.top/image/HttpCache原理.png)
 
@@ -85,7 +85,7 @@ Timing-Allow-Origin: *
 EagleId: b7cb451c15878952940375540e
 ```
 
-可以看到，`max-age` 是个很大的值，那如何模拟Browser端缓存失效的场景呢？其实，Browser在认为缓存失效时，会在请求头加上一个 `If-None-Modified` 头，他的值就是对应资源的标签（或者说指纹，即上面的Etag字段），这样Server就可以拿这个值和自己的比对，如果相同，说明没有更改，就直接响应一个304，告诉客户端继续用自己的就行了。下面我们加上这个Header模拟一下。
+可以看到，`max-age` 是个很大的值，那如何模拟Browser端缓存失效的场景呢？其实，Browser在认为缓存失效时，会在请求头加上一个 `If-None-Match` 头，他的值就是对应资源的标签（或者说指纹，即上面的Etag字段），这样Server就可以拿这个值和自己的比对，如果相同，说明没有更改，就直接响应一个304，告诉客户端继续用自己的就行了。下面我们加上这个Header模拟一下。
 
 ```text
 curl 'http://image.feathers.top/image/WechatIMG1.jpeg' \
