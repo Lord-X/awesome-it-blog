@@ -69,4 +69,7 @@ current_age的计算涉及到Response Header的 `age` 头部，所以我们先�
 
 ## 参考
 
-极客时间 - Web协议详解与抓包实战
+* [极客时间 - Web协议详解与抓包实战](https://time.geekbang.org/course/intro/100026801?utm_term=pc_interstitial_259)
+* [RFC7234](https://www.rfc-editor.org/rfc/pdfrfc/rfc7234.txt.pdf)
+* [Cacheable](https://developer.mozilla.org/en-US/docs/Glossary/cacheable)
+* [Http Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)
