@@ -172,4 +172,27 @@ public void registerListener(String switcherName, SwitcherListener listener) {
 }
 ```
 
-至此，Switcher和监听器的初始化工作就完成了，
+至此，Switcher和监听器的初始化工作就完成了，最后打开开关，调用 `available` 方法将server变为可用状态。`available` 会调用 `doAvailable` 方法将当前节点添加到ZK中的 `server` path下，并移除 `unavailableServer` path下的节点（如果存在）。
+
+```java
+protected void doAvailable(URL url) {
+    try {
+        serverLock.lock();
+        if (url == null) {
+            availableServices.addAll(getRegisteredServiceUrls());
+            for (URL u : getRegisteredServiceUrls()) {
+                removeNode(u, ZkNodeType.AVAILABLE_SERVER);
+                removeNode(u, ZkNodeType.UNAVAILABLE_SERVER);
+                createNode(u, ZkNodeType.AVAILABLE_SERVER);
+            }
+        } else {
+            availableServices.add(url);
+            removeNode(url, ZkNodeType.AVAILABLE_SERVER);
+            removeNode(url, ZkNodeType.UNAVAILABLE_SERVER);
+            createNode(url, ZkNodeType.AVAILABLE_SERVER);
+        }
+    } finally {
+        serverLock.unlock();
+    }
+}
+```
